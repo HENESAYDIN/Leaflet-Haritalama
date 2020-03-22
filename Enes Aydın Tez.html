@@ -1,0 +1,182 @@
+<html>
+
+<head>
+    <title> ENES AYDIN LEAFLET İLE HARİTALAMA TEZi</title>
+
+
+    <!--Leaflet ve Css dosyasını belgemizin baş kısmına eklenir-->
+
+    <script src="js/leaflet-src.js"></script>
+    <link rel="stylesheet" href="css/leaflet.css" />
+    <!-------------------------------------------------------->
+
+    <!---Çizim Araçların Kullamak için Leaflet Fonksiyonlarının Kullanımı Yapılır
+     Haritadaki fonksiyonların kullanıcı isteğiyle gerçekleşir,
+     fonksiyonların aktiflik durumuna göre tasarımı yapılır--------------------->
+
+    <script src="js/leaflet.draw.js"></script>
+    <script src="js/leaflet.draw.event.js"></script>
+    <link rel="stylesheet" href="css/leaflet.draw.css" />
+    <!-------------------------------------------------------->
+
+    <!----Araç Kutusundaki kurgulanan fonksiyonların aktif-pasif olmasını işlemi---->
+    <script src="js/toolbar.js"></script>
+    <script src="js/tooltip.js"></script>
+    <!-------------------------------------------------------->
+
+    <!----Araç Kutusundaki kurgulanan fonksiyonların özelleştirilerek kulanılması ---->
+    <script src="js/geometryutil.js"></script>
+    <script src="js/LatLngUtil.js"></script>
+    <script src="js/LineUtil.intersect.js"></script>
+    <script src="js/Polygon.intersect.js"></script>
+    <script src="js/Polyline.intersect.js"></script>
+    <script src="js/touchEvent.js"></script>
+
+    <script src="js/DrawToolbar.js"></script>
+    <script src="js/Draw.Feature.js"></script>
+    <script src="js/Draw.SimpleShape.js"></script>
+    <script src="js/Draw.Polyline.js"></script>
+    <script src="js/Draw.Marker.js"></script>
+    <script src="js/Draw.Circle.js"></script>
+    <script src="js/Draw.CircleMarker.js"></script>
+    <script src="js/Draw.Polygon.js"></script>
+    <script src="js/Draw.Rectangle.js"></script>
+
+
+    <script src="js/EditToolbar.js"></script>
+    <script src="js/EditToolbar.Edit.js"></script>
+    <script src="js/EditToolbar.Delete.js"></script>
+
+
+    <!----Çizim kontrolünü, seçeneklerden araç çubuklarını başlatır.--->
+
+    <script src="js/Control.Draw.js"></script>
+    <!-------------------------------------------------------->
+
+    <!----Çizim kontrolünü, seçeneklerden araç çubuklarının 
+    bazı durumlara göre düzenlenme işlemidir.--->
+    <script src="js/Edit.Polyline.js"></script>
+    <script src="js/Edit.SimpleShape.js"></script>
+    <script src="js/Edit.Rectangle.js"></script>
+    <script src="js/Edit.Marker.js"></script>
+    <script src="js/Edit.CircleMarker.js"></script>
+    <script src="js/Edit.Circle.js"></script>
+    <script src="js/draw.js"></script>
+
+    <!-----<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.2/leaflet.draw.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.2/leaflet.draw.js"></script>
+    --->
+
+    <link rel='stylesheet' href='https://xguaita.github.io/mtig-js/libs/styleeditor/css/Leaflet.StyleEditor.min.css'>
+
+</head>
+
+<body>
+
+    <Button id="btn-outline-success" onclick="getLocation()">Mevcut Konum</Button>
+    <!--Haritanın body kısmına hangi boyutlarda gelmesini sağlar(Dosyada alan belirtir)-->
+    <div id="map" style="width: %120; height: 100vh; border: 1px solid #ccc"></div>
+    <!-------------------------------------------------------->
+    <!---Uygulamamızın hangi harita altlıklarını istiyorsak onları alttaki gibi yapılması suretiyle gösterilir.------->
+    <script>
+        var esriUrl= 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+		    esriAttrib = 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+		    ESRİ_World_Imagery=L.tileLayer(esriUrl, {
+                maxZoom: 20,
+                attribution: esriAttrib
+            }),
+			map = new L.Map('map', {
+                center: new L.LatLng(40.99465, 39.77552),
+                zoom: 15
+            }),
+            drawnItems = L.featureGroup().addTo(map);
+        L.control.layers({
+            'ESRİ_World_Imagery': ESRİ_World_Imagery.addTo(map),
+
+            'OpenStreetMap':L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+			zoom: 20,
+			attribution:'&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+			}),
+			
+            'ESRİ_World_Imagery': L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                zoom: 15,
+                attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+
+            }),
+			
+            'CartoDB_DarkMatter': L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                subdomains: 'abcd',
+                maxZoom: 19
+            }),
+			
+            'HikeBike_HikeBike': L.tileLayer('https://tiles.wmflabs.org/hikebike/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }),
+			
+            'Stamen_TonerHybrid': L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner-hybrid/{z}/{x}/{y}{r}.{ext}', {
+                attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                subdomains: 'abcd',
+                minZoom: 0,
+                maxZoom: 20,
+                ext: 'png'
+            }),
+
+            'Esri_WorldStreetMap': L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+                zoom: 15,
+                attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012'
+
+            }),
+			
+            'OpenTopoMap': L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+                zoom: 15,
+                attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+            }),
+			
+            'OpenMapSurfer_Roads': L.tileLayer('https://maps.heigit.org/openmapsurfer/tiles/roads/webmercator/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: 'Imagery from <a href="http://giscience.uni-hd.de/">GIScience Research Group @ University of Heidelberg</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            })
+        }, {
+            'drawlayer': drawnItems
+        }, {
+            position: 'topleft',
+            collapsed: false
+        }).addTo(map);
+        map.addControl(new L.Control.Draw({
+            edit: {
+                featureGroup: drawnItems,
+                poly: {
+                    allowIntersection: false
+                }
+            },
+            draw: {
+                polygon: {
+                    allowIntersection: false,
+                    showArea: true
+                }
+            }
+        }));
+
+        map.on(L.Draw.Event.CREATED, function(event) {
+            var layer = event.layer;
+
+            drawnItems.addLayer(layer);
+        });
+    </script>
+
+    <script src='https://xguaita.github.io/mtig-js/libs/styleeditor/javascript/Leaflet.StyleEditor.min.js'></script>
+    <script>
+        // StyleEditor
+        var styleCtrl = L.control.styleEditor({
+            openOnLeafletDraw: true,
+            showTooltip: false
+        });
+        map.addControl(styleCtrl);
+    </script>
+
+
+</body>
+
+</html>
